@@ -104,7 +104,8 @@
 <style scoped>
 	.splash-container{
 		background-color: rgb(255, 0, 64, 0.1);
-		width: 100%;
+		float: right;
+		width: 65%;
 		height: 662px;
 		z-index: 5;
 	}

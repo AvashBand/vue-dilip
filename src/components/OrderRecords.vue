@@ -9,35 +9,37 @@
 				<span style="font-weight:600;">Admin Panel</span>
 			</div>
 			<div class="ContentBox">
-				<table class="table" style="border: 3px solid #e6e6e6;">
-				  <thead class="thead-dark">
-				    <tr>
-				      <th scope="col">SN</th>
-				      <th scope="col">OrderID</th>
-				      <th scope="col">Username</th>
-				      <th scope="col">Food Name</th>
-				      <th scope="col">Order Status</th>
-				      <th scope="col">Date</th>
-				      <th scope="col">Time</th>
-				    </tr>
-				  </thead>
-				  <tbody>
-				    <tr>
-				      <th scope="row">1</th>
-				      <td>1</td>
-				      <td>Ram</td>
-				      <td>Momo</td>
-				      <td>Received</td>
-				      <td>2075/1/8</td>
-				      <td>10:00pm</td>
-				    </tr>
-				  </tbody>
-				</table>
+				<div class="table-area w3-container w3-center w3-animate-opacity">
+					<table>
+					    <tr>
+					    	<th scope="col">SN</th>
+					    	<th scope="col">Username</th>
+					    	<th scope="col">Food Name</th>
+					    	<th scope="col">Order Status</th>
+					    	<th scope="col">Date</th>
+					    	<th scope="col">Time</th>
+					    </tr>
+					    <tr>
+					    	<td>1</td>
+					    	<td>Ram</td>
+					    	<td>Momo</td>
+					    	<td>Received</td>
+					    	<td>2075/1/8</td>
+					    	<td>10:00pm</td>
+					    </tr>
+					</table>
+				</div>
 			</div>
 		</div>
 	</div>
 </template>
 <style scoped>
+	.btn{
+		border-radius: 0px;
+	}
+	td, th{
+		text-align: center;
+	}
 	.container-fluid{
 		margin: 0px;
 		padding: 0px;
@@ -49,7 +51,7 @@
 		/*left: calc(238px);*/
 		padding: 15px;
 		width: 98%;
-		margin: -10px 10px 10px 10px;
+		margin: 60px 10px 10px -10px;
 		/*width: calc(100% - 250px);*/
 	}
 	.ContentBox{
@@ -121,5 +123,32 @@
 
 	.slider.round:before {
 	  border-radius: 50%;
+	}
+
+	.w3-container, .w3-panel {
+	    padding: 0px;
+	}
+	table {
+		border: 3px solid #e6e6e6; 
+	    border-collapse: collapse;
+	    border-spacing: 0;
+	    width: 100%;
+	    margin: 0px;
+	}
+
+	th, td {
+	    text-align: center;
+	    padding: 10px;
+	}
+
+	th {
+		background-color: black;
+	    color: white;
+	}
+	tr:nth-child(even) {
+	    background-color: #f2f2f2
+	}
+	td{
+		padding: 5px; 
 	}
 </style>

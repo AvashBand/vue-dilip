@@ -22,35 +22,17 @@
 				  <tr>
 				    <th>SN</th>
 				    <th>Food Name</th>
+				    <th>Price</th>
 				    <th>Order</th>
 				  </tr>
 				  <tr>
 				    <td>1</td>
 				    <td>Momo</td>
+				    <td>Rs.100</td>
 				    <td>
-				    	<button class="btn btn-primary btn-lg" v-on:click="Show">Order</button>
+				    	<button class="btn btn-primary" v-on:click="Show">Order</button>
 				    </td>
 				  </tr>
-				  <tr>
-				    <td>2</td>
-				    <td>Chaumin</td>
-				    <td>
-				    	<button class="btn btn-primary btn-lg"  v-on:click="Show">Order</button>
-				    </td>
-				  </tr>
-				  <tr>
-				    <td>3</td>
-				    <td>Thukpaa</td>
-				    <td>
-				    	<button class="btn btn-primary btn-lg"  v-on:click="Show">Order</button>
-				    </td>
-				  </tr>
-				  <tr>
-				    <td>4</td>
-				    <td>Cold Drinks</td>
-				    <td>
-				    	<button class="btn btn-primary btn-lg"  v-on:click="Show">Order</button>
-				    </td>
 				  </tr>
 				</table>
 			</div>
@@ -110,6 +92,15 @@
 	}
 </script>
 <style>
+	.btn{
+		border-radius: 0px;
+	}
+	td, th{
+		text-align: center;
+	}
+	body{
+		background-color: #ffe5ec;
+	}
 	.success-div{
 		outline: none;
 		visibility: hidden;
@@ -174,7 +165,7 @@
 		padding: 15px;
 		transition: 0.2s;
 		width: auto;
-		margin: -10px 10px 10px 10px;
+		margin: 60px 10px -11px 10px;
 	}
 	.user-addressing{
 		font-size: 25px; 

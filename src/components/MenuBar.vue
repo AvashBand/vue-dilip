@@ -77,15 +77,17 @@
 		</div>
 
 		<!-- Log Out Popup -->
-		<div class="logoutBox" :class="{ShowBox:ShowLogoutBox}">
-			<div class="LogoutMessage">
-				<p>Are you sure you want to log out?</p>
-			</div>
-			<div class="button-area">
-				<button class="btn btn-primary btn-lg" style="margin-right: 10px;" v-on:click="Navigate">Logout</button>
-				<button class="btn btn-danger btn-lg" v-on:click="CancelLogout">Cancel</button>
-			</div>
-		</div>	
+		<div class="popup-div-wrapper"  v-bind:class="{showBoxAndBoxAnimation:ShowLogoutBox}">
+			<div class="logoutBox" :class="{ShowBox:ShowLogoutBox}">
+				<div class="LogoutMessage">
+					<p>Are you sure you want to log out?</p>
+				</div>
+				<div class="button-area">
+					<button class="btn btn-primary btn-lg" style="margin-right: 10px;" v-on:click="Navigate">Logout</button>
+					<button class="btn btn-danger btn-lg" v-on:click="CancelLogout">Cancel</button>
+				</div>
+			</div>			
+		</div>
 	</div>	
 </template>
 
@@ -174,15 +176,26 @@
 	
 <!-- Style For MenuBar and Logout PopUp -->
 <style scoped>
+	.popup-div-wrapper{
+		position: fixed;
+		z-index: 10;
+		top: 0;
+		left: 0;
+		background-color: #0000008c;
+		height: 100%;
+		width: 100%;
+		visibility: hidden;
+	}
 	.router-link{
 		text-decoration: none;
 		color: white;
 	}
 	.MenuBar{
-		z-index: -1;
+		z-index: 5;
 		border: 0px;
 		outline: none;
 	}
+
 	.logoutBox{
 		z-index: 1;
 		position: absolute;
@@ -191,11 +204,10 @@
 		background-color: rgb(0, 0, 0, 0.9);
 		color: white;
 		border: 2px solid #e6e6e6;
-		border-radius: 5px;
+		border-radius: 10px;
 		padding: 10px;
-		top: 20%;
-		left: 40%;
-		visibility: hidden;
+		top:  37%;
+		left: 41%;
 	}
 	.LogoutMessage{
 		text-align: center;
@@ -238,12 +250,16 @@
 </style>
 
 <style scoped>
+	.navbar-fixed-top{
+		position: fixed;
+		z-index: 1;
+	}
 	.sidenav{
 		height: 100%;
 		width: 0;
-		position: relative;
+		position: fixed;
 		z-index: 0;
-		top: 0px;
+		top: 50px;
 		left: 0;
 		background-color: #b30047;
 		overflow: hidden;
@@ -332,4 +348,15 @@
 	.menu-option-active{
 		background-color: #cc0052;
 	}
+	.showBoxAndBoxAnimation{
+		visibility: visible;
+		animation: shake 0.1s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+		transform: translate3d(0, 0, 0);
+		backface-visibility: hidden;
+		perspective: 1000px;
+	}
+/*	@keyframes shake {
+		0% { opacity: 0 }
+		100% {opacity : 1}
+	}*/
 </style>
