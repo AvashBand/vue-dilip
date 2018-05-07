@@ -24,7 +24,7 @@
 
 <style type="text/css">
   body{
-    background-color: #f1f2f4;
+    /*background-color: #f1f2f4;*/
     margin: 0;
     font-family: 'Raleway';
     font-size: 16px;
