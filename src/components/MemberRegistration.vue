@@ -5,6 +5,20 @@
 				<img class="home-splash" src="../assets/HomeSplash.gif">
 			</div>
 		</div>
+	
+	<!-- Info -->
+	<div>
+		<div class="registration-successful-box" v-if="showthebox" v-bind:class="BoxAnimation"><!-- v-bind:class="BoxAnimation" -->
+			<div class="w3-center">
+				<p style="font-size:30px; font-weight:600; padding:5px 0; margin:0;">Registration Successful <i style="margin-left:10px;" class="glyphicon glyphicon-thumbs-up"></i></p>
+				<div style="background-color: rgb(210, 3, 98); padding:10px; width:500px; margin: 0 auto; border-radius:10px;">
+					<p style="font-weight:600; font-size:13px; margin-bottom:8px;">But first</p>
+					<p style="font-weight:600;">Your account has to be approved by admin in order to login.</p>
+					<router-link to="/" exact > <button  class="btn btn-light"> Go to Login </button> </router-link>
+				</div>
+			</div>
+		</div>
+	  </div>
 
 		<div class="SignUpBox">
 			<div class="SignUpInfo">
@@ -12,9 +26,10 @@
 			</div>
 			<div class="FormElements">
 				<p class="FormLabel">Full Name</p>
-				<input v-model="Fullname" v-on:click="hideErrors" type="text"  id="txtEmail" placeholder="Type your Email address" required/>
+				<input v-model="Fullname" v-on:click="hideErrors" type="text"  id="txtFullName" placeholder="Type your full name" required/>
 				<p id="EmailError" class="errorMsg">&nbsp{{ FullNameErrorMessage }}</p>
-				<p class="FormLabel">Username</p>
+
+				<p class="FormLabel">Username</p>	
 				<input v-model="Username" v-on:click="hideErrors" type="text" id="txtUsername" placeholder="Type your Username" required/>
 				<p id="UsernameError" class="errorMsg">&nbsp{{ UserNameErrorMessage }}</p>
 				<p class="FormLabel">Password</p>
@@ -22,12 +37,12 @@
 				<input v-model="ConfirmPassword" v-on:click="hideErrors" type="text" id="txtPassword" placeholder="Confirm Password" required/>
 				<p style="margin-bottom:0px;" id="PasswordError" class="errorMsg">&nbsp{{ PasswordErrorMessage }}</p>
 				<div>
-					<button type="button" class="btnRefresh " v-on:click="ClearTextBox">
+					<button type="button" class="btnRefresh" v-on:click="ClearTextBox">
 						<img src="../assets/reload.png" width="30px;">
 					</button>
 				</div>
 				<div>
-					<p class="Policy" style="margin-top:40px;">
+					<p class="Policy" style="margin-left:5px; margin-top:40px;">
 						By creating an account you agree to our 
 						<a href="#">Terms</a> 
 						& 
@@ -35,7 +50,7 @@
 					</p>
 				</div>
 
-				<button class="btnSubmit" style="width:100%;" v-on:click="LoginValidation"> Create Account</button>
+				<button class="btnSubmit" style="width:100%;" v-on:click="Registration"> Create Account</button>
 
 				<p class="Policy" style="color: #666; text-align: center;">
 					<br/>
@@ -53,6 +68,8 @@
 </template>
 
 <script>
+	import axios from 'axios'
+	import qs from 'qs'
 	export default{
 		data(){
 			return{
@@ -64,10 +81,12 @@
 				FullNameErrorMessage : '',
 				UserNameErrorMessage : '',
 				PasswordErrorMessage : '',
+				showthebox : false,
+				BoxAnimation : ''
 			}
 		},
 			methods:{
-				LoginValidation : function(){
+				Registration : function(){
 					if(this.Fullname == "" || this.Username == "" || this.NewPassword == "" || this.ConfirmPassword == ""){
 						if(this.Fullname == "")
 							this.FullNameErrorMessage = 'Full name cannot be empty.';			
@@ -77,16 +96,31 @@
 							this.PasswordErrorMessage ='Passwords fields cannot be empty.';
 					}
 					else{
-						if(this.NewPassword != this.ConfirmPassword)
+						if(this.NewPassword != this.ConfirmPassword){
 							this.PasswordErrorMessage ='The passwords did not match.'
-						
-						//Fetching of data From Database > Store.js > Load here
-						//Right now using sample data
-						else if(this.Username == 'admin'){
-							this.UserNameErrorMessage = 'The username is already used.';
+							return;
 						}
 						else{
-							//Approve login
+							const data = {
+								"name": this.Fullname,
+								"email" : this.Username,
+								"password" : this.ConfirmPassword
+							}
+
+							axios({
+								method: 'post',
+								url: 'http://localhost:3000/members',
+								data : data,
+								headers: {
+										  'Content-Type': 'application/json',
+										  'Accept': 'application/json',
+								},
+
+							}).then(
+								respose => {
+									this.ShowRegistrationBox();
+								}
+							);
 						}
 					}
 				},
@@ -105,12 +139,19 @@
 					this.NewPassword = "";
 					this.ConfirmPassword = "";
 					this.hideErrors();
+				},
+				ShowRegistrationBox :function(){
+					this.showthebox = true;
+					this.BoxAnimation = 'w3-animate-zoom';
 				}
 			}
 		}
 </script>
 
 <style scoped>
+	p{
+		margin-bottom: 5px;
+	}
 	.btnRefresh{
 	    background-color: transparent;
 	    border: none;
@@ -128,7 +169,8 @@
 	}
 	.splash-container{
 		background-color: rgb(255, 0, 64, 0.1);
-		width: 100%;
+		float: right;
+		width: 65%;
 		height: 662px;
 		z-index: 5;
 	}
@@ -149,7 +191,8 @@
 		left: 17%;
 		position: absolute;
 		transform: translate(-50%, -50%);
-		box-shadow: 3px 6px 8px #888888;			
+		box-shadow: 3px 6px 8px #888888;	
+		padding-bottom: 20px;		
 	}
 	.SignUpInfo{
 		margin: 20px 0px 10px 0px;
@@ -170,7 +213,8 @@
 	.FormLabel{
 		/*padding-top: 20px;*/
 		font-weight: bold;
-		line-height: 0px;
+		line-height: 10px;
+
 	}
 	.FormElements input[type="text"], input[type="password"]{
 		border: none;
@@ -187,10 +231,11 @@
 		font-weight: 600;
 		text-decoration: none;
 	}
-	.FormElements .Policy{
-
+	.Policy{
+		font-weight: 600;
 		text-align: justify;
 		font-size: 16px;
+		padding-bottom: 10px; 
 		/*padding: 0px 20px 0px 20px;*/
 	}
 	.FormElements p a:hover{
@@ -230,7 +275,24 @@
 		color: red;
 		font-size: 12px;
 		line-height: 20px;
+		margin: 0px;
 		/*visibility: hidden;*/
 		/*visibility: hidden;*/
 	}
+	.registration-successful-box{
+		background-color:/* #da2459;*/ rgb(255, 26, 117, 0.8); 
+		color: white;
+		height: 190px;
+		width: 530px;
+		position: absolute;
+		top:25%;
+		left:30%;
+		border-radius: 20px;
+		border: 4px solid white;
+		box-shadow: 3px 6px 8px #888888;
+		/*visibility: hidden;*/
+	}
+	/*p{
+		margin: 3px;
+	}*/
 </style>

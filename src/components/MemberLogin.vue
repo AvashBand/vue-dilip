@@ -6,16 +6,16 @@
 			</div>
 		</div>
 		<div id="loginbox">
-			<img src="../assets/LoginAvatar.png" class="avatar">
+			<img src="../assets/loginAvatar.png" class="avatar">
 			<h1 style="font-weight:600; margin-bottom:20px; color:#b30059;">Login Here</h1>
 			<div>
 				<p>Username</p>
-				<input type="text" id="txtUsername" value="" autocomplete="off" placeholder="Enter Username" v-on:click="hideErrors" v-on:keyup.enter="GetChar(event)"  v-model="User.Username">
+				<input type="text" id="txtUsername" value="" autocomplete="off" placeholder="Enter Username" v-on:click="hideErrors" v-on:keyup.enter="GetChar(event)"  v-model="Username">
 				<br>
 				<p v-bind:class="{UsernameError:UErrorShown}" class="errorMsg">Please Enter Username</p>
 				<p>Password</p>
 
-				<input type="password" id="txtPassword" placeholder="Enter Password" v-on:click="hideErrors" v-on:keyup.enter="LoginValidation" v-model="User.Password">
+				<input type="password" id="txtPassword" placeholder="Enter Password" v-on:click="hideErrors" v-on:keyup.enter="GetChar(event)" v-model="Password">
 				<p v-bind:class="{PasswordError:PErrorShown}" class="errorMsg">Please Enter Password</p>
 
 				<div width="100%" style="margin-top: 20px; margin-bottom: 30px;">
@@ -41,49 +41,105 @@
 </template>
 
 <script type="text/javascript">
+
+import axios from 'axios'
+import qs from 'qs'
+
 	export default{
 		components: {
 
 		},
 		data(){
 			return{
-				User: {
-					Username: "",
-					Password: ""
-				},
+				Username: "",
+				Password: "",
 				UErrorShown : false,
 				PErrorShown : false,
-				UPErrorShown : false
-
+				UPErrorShown : false,
+				token : "",
 			}
 		},
+		
 		methods:{
 			LoginValidation : function(){
-				var Uname = this.User.Username;
-				var Pword = this.User.Password;
+				var Uname = this.Username;
+				var Pword = this.Password;
 				if(Uname == "" && Pword == ""){
 					this.UErrorShown = true;
 					this.PErrorShown = true;
 				}
 				else{
-					//Fetching of data From Database > Store.js > Load here
 
-					//Right now using sample data
-					if(Uname == "admin" && Pword == "admin"){
+					const data = {
+						username: Uname,
+						password : Pword
+						}
 
-						//UserID and UserAuthentication needs to be passed here
+						axios({
+							method: 'post',
+							url: '',
+							data: data,
+							headers: {
+									  'Content-Type' : 'application/json',
+									  'Accept' : 'application/json'
+							}
 
-						this.$router.push('/admin');
-					}
-					else if(Uname == "user" && Pword == "user"){
-						
-						this.$router.push('/order');
-					}
-					else {
-						this.UPErrorShown = true;
-					}
+						}).then(
+							response => {
+								console.log(response);
+								localStorage.setItem('token', response.data.access_token);
+								localStorage.setItem('expiration', response.data.expires_in + Date.now());
+								axios({
+									method: 'get',
+									url: 'http://foods.test/api/user',
+									data: data,
+									headers: {
+											  'Content-Type' : 'application/json',
+											  'Accept' : 'application/json',
+											  'Authorization' : 'Bearer ' + response.data.access_token,
+											},
+
+								}).then(
+									response => {
+										console.log(response);
+										localStorage.setItem('name', response.data.name);
+										localStorage.setItem('username', response.data.email);
+										localStorage.setItem('is_active', response.data.is_active);
+										localStorage.setItem('is_admin', response.data.is_admin);
+										
+										if (localStorage.getItem('is_admin') != null && localStorage.getItem('is_admin') != 0) 
+										{
+											this.$router.push('/usertable');
+											return;
+										}
+
+										this.$router.push('/fullui');
+									}
+
+								);
+
+								
+							}
+
+						).catch(error => {
+							
+							if (error == 'Error: Request failed with status code 401') {
+								this.UPErrorShown = true;
+								localStorage.removeItem('token');
+								localStorage.removeItem('expiration');
+								localStorage.removeItem('is_active');
+								localStorage.removeItem('is_admin');
+							}
+
+						});
 				}
 			},
+
+			afterValidated: function(){
+				alert('sample');
+				
+			},
+
 			hideErrors: function(){
 				this.UErrorShown = false;
 				this.PErrorShown = false;
@@ -93,8 +149,8 @@
 
 			},
 			ClearTextBox : function(){
-				this.Username = "";
-				this.Password = "";
+				this.User.Username = "";
+				this.User.Password = "";
 				this.hideErrors();
 			}
 		}
@@ -165,9 +221,6 @@
 		height: 40px;
 		color: #000;
 		font-size: 16px;
-	}
-	#loginbox  input[type="password"]{
-		font: large Verdana,sans-serif;
 	}
 	.btnSubmit{
 		border: none;
