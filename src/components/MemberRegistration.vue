@@ -25,6 +25,7 @@
 				<h2>Member Registration</h2>
 			</div>
 			<div class="FormElements">
+
 				<p class="FormLabel">Full Name</p>
 				<input v-model="Fullname" v-on:click="hideErrors" type="text"  id="txtFullName" placeholder="Type your full name" required/>
 				<p id="EmailError" class="errorMsg">&nbsp{{ FullNameErrorMessage }}</p>
@@ -32,10 +33,13 @@
 				<p class="FormLabel">Username</p>	
 				<input v-model="Username" v-on:click="hideErrors" type="text" id="txtUsername" placeholder="Type your Username" required/>
 				<p id="UsernameError" class="errorMsg">&nbsp{{ UserNameErrorMessage }}</p>
+
 				<p class="FormLabel">Password</p>
 				<input v-model="NewPassword" v-on:click="hideErrors" type="text" id="txtPassword" placeholder="Enter a new Password" style="margin-bottom:20px;" required/>
+
 				<input v-model="ConfirmPassword" v-on:click="hideErrors" type="text" id="txtPassword" placeholder="Confirm Password" required/>
 				<p style="margin-bottom:0px;" id="PasswordError" class="errorMsg">&nbsp{{ PasswordErrorMessage }}</p>
+
 				<div>
 					<button type="button" class="btnRefresh" v-on:click="ClearTextBox">
 						<img src="../assets/reload.png" width="30px;">
@@ -96,14 +100,23 @@
 							this.PasswordErrorMessage ='Passwords fields cannot be empty.';
 					}
 					else{
+						if(this.Username.length < 5){
+							this.UserNameErrorMessage = 'Fullname too short.';
+						}
+						if(this.Username.length < 5){
+							this.UserNameErrorMessage = 'Username cannot be less than 5 characters.';
+						}
 						if(this.NewPassword != this.ConfirmPassword){
 							this.PasswordErrorMessage ='The passwords did not match.'
 							return;
 						}
+						if(this.NewPassword < 6 && this.ConfirmPassword < 6){
+							this.PasswordErrorMessage ='Password must be at least 6 characters.'
+						}
 						else{
 							const data = {
 								"name": this.Fullname,
-								"email" : this.Username,
+								"username" : this.Username,
 								"password" : this.ConfirmPassword
 							}
 
@@ -112,8 +125,8 @@
 								url: 'http://localhost:3000/members',
 								data : data,
 								headers: {
-										  'Content-Type': 'application/json',
-										  'Accept': 'application/json',
+									'Content-Type': 'application/json',
+									'Accept': 'application/json',
 								},
 
 							}).then(

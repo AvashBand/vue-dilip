@@ -12,14 +12,14 @@
 				<p>Username</p>
 				<input type="text" id="txtUsername" value="" autocomplete="off" placeholder="Enter Username" v-on:click="hideErrors" v-on:keyup.enter="GetChar(event)"  v-model="Username">
 				<br>
-				<p v-bind:class="{UsernameError:UErrorShown}" class="errorMsg">Please Enter Username</p>
+				<p class="errorMsg">{{ username_error }}</p>
 				<p>Password</p>
 
 				<input type="password" id="txtPassword" placeholder="Enter Password" v-on:click="hideErrors" v-on:keyup.enter="GetChar(event)" v-model="Password">
-				<p v-bind:class="{PasswordError:PErrorShown}" class="errorMsg">Please Enter Password</p>
+				<p class="errorMsg">{{ password_error }}</p>
 
 				<div width="100%" style="margin-top: 20px; margin-bottom: 30px;">
-					<p v-bind:class="{UsernameAndPasswordError:UPErrorShown}" class="errorMsg" style="float:left;">Username or Password Error</p>
+					<p class="errorMsg" style="float:left;">{{ username_and_password_Error }}</p>
 
 					<button type="button" class="btnRefresh " v-on:click="ClearTextBox">
 						<img src="../assets/reload.png" width="30px;">
@@ -37,6 +37,17 @@
 				<br>
 			</div>	
 		</div>
+
+		<div class="popup-div-wrapper"  v-bind:class="{showBoxAndBoxAnimation:bool_show_login_error_popup}">
+			<div class="delete-box">
+				<div class="delete-message">
+					<p style="margin-bottom: 10px; font-size: 18px; font-weight: 600;">Your ID hasn't been approved by admin yet. Sorry for the inconvenience. </p>
+				</div>
+				<div style="display: flex; align-items: center; justify-content: center;">
+					<button v-on:click="hide_login_error_popup" class="btn btn-danger" style="margin-right: 10px; width: 100px;">Close</button>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -53,10 +64,15 @@ import qs from 'qs'
 			return{
 				Username: "",
 				Password: "",
-				UErrorShown : false,
-				PErrorShown : false,
-				UPErrorShown : false,
 				token : "",
+
+				username_error: '',
+				password_error : '',
+				username_and_password_Error : '',
+
+
+				bool_show_login_error_popup: false
+
 			}
 		},
 		
@@ -64,75 +80,37 @@ import qs from 'qs'
 			LoginValidation : function(){
 				var Uname = this.Username;
 				var Pword = this.Password;
-				if(Uname == "" && Pword == ""){
-					this.UErrorShown = true;
-					this.PErrorShown = true;
+				if(Uname == "" || Pword == ""){
+					if(Uname == "")
+						this.username_error = 'Please Enter Username';
+					if(Pword == "")
+						this.password_error = 'Please Enter Password';
 				}
 				else{
-
 					const data = {
 						username: Uname,
 						password : Pword
+					}
+					axios({
+						method: 'post',
+						url: 'http://localhost:3000/members/login',
+						data: data,
+						headers: {
+							'Content-Type': 'application/json',
+							'Accept': 'application/json'
 						}
+					}).then((response) => {
+						console.log(response.data);
+						console.log(response.headers);
 
-						axios({
-							method: 'post',
-							url: '',
-							data: data,
-							headers: {
-									  'Content-Type' : 'application/json',
-									  'Accept' : 'application/json'
-							}
-
-						}).then(
-							response => {
-								console.log(response);
-								localStorage.setItem('token', response.data.access_token);
-								localStorage.setItem('expiration', response.data.expires_in + Date.now());
-								axios({
-									method: 'get',
-									url: 'http://foods.test/api/user',
-									data: data,
-									headers: {
-											  'Content-Type' : 'application/json',
-											  'Accept' : 'application/json',
-											  'Authorization' : 'Bearer ' + response.data.access_token,
-											},
-
-								}).then(
-									response => {
-										console.log(response);
-										localStorage.setItem('name', response.data.name);
-										localStorage.setItem('username', response.data.email);
-										localStorage.setItem('is_active', response.data.is_active);
-										localStorage.setItem('is_admin', response.data.is_admin);
-										
-										if (localStorage.getItem('is_admin') != null && localStorage.getItem('is_admin') != 0) 
-										{
-											this.$router.push('/usertable');
-											return;
-										}
-
-										this.$router.push('/fullui');
-									}
-
-								);
-
-								
-							}
-
-						).catch(error => {
-							
-							if (error == 'Error: Request failed with status code 401') {
-								this.UPErrorShown = true;
-								localStorage.removeItem('token');
-								localStorage.removeItem('expiration');
-								localStorage.removeItem('is_active');
-								localStorage.removeItem('is_admin');
-							}
-
-						});
+					}).catch((e) => { console.log("Cannot post data. \n " , e)});
 				}
+			},	
+			show_login_error_popup: function(){
+				this.bool_show_login_error_popup = true;
+			},
+			hide_login_error_popup: function(){
+				this.bool_show_login_error_popup = false;
 			},
 
 			afterValidated: function(){
@@ -141,9 +119,9 @@ import qs from 'qs'
 			},
 
 			hideErrors: function(){
-				this.UErrorShown = false;
-				this.PErrorShown = false;
-				this.UPErrorShown = false;
+				this.username_error = '';
+				this.password_error = '';
+				this.username_and_password_Error = '';
 			},
 			GetChar : function(e){
 
@@ -255,7 +233,6 @@ import qs from 'qs'
 		color: red;
 		font-size: 12px;
 		line-height: 0px;
-		visibility: hidden;
 	}
 
 	.UsernameError{
@@ -286,5 +263,39 @@ import qs from 'qs'
 	    border-radius: 50%;
 	}
 
-
+	.popup-div-wrapper{
+		position: fixed;
+		z-index: 10;
+		top: 0;
+		left: 0;
+		background-color: #0000008c;
+		height: 100%;
+		width: 100%;
+		visibility: hidden;
+	}
+	.delete-box{
+		text-align: center;
+		z-index: 7;
+		position: absolute;
+		width: 290px;
+		/*height: 140px;*/
+		background-color: rgb(0, 0, 0, 0.9);
+		color: white;
+		border: 2px solid #e6e6e6;
+		border-radius: 10px;
+		padding: 15px;
+		top:  37%;
+		left: 41%;
+	}
+	.showBoxAndBoxAnimation{
+		visibility: visible;
+		animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+		transform: translate3d(0, 0, 0);
+		backface-visibility: hidden;
+		perspective: 1000px;
+	}
+	@keyframes shake {
+		0% { opacity: 0 }
+		100% {opacity : 1}
+	}
 </style>
