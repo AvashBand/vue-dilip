@@ -101,7 +101,7 @@
 					}
 					else{
 						if(this.Username.length < 5){
-							this.UserNameErrorMessage = 'Fullname too short.';
+							this.FullNameErrorMessage = 'Fullname too short.';
 						}
 						if(this.Username.length < 5){
 							this.UserNameErrorMessage = 'Username cannot be less than 5 characters.';
@@ -114,26 +114,41 @@
 							this.PasswordErrorMessage ='Password must be at least 6 characters.'
 						}
 						else{
-							const data = {
-								"name": this.Fullname,
-								"username" : this.Username,
-								"password" : this.ConfirmPassword
-							}
-
 							axios({
-								method: 'post',
-								url: 'http://localhost:3000/members',
-								data : data,
-								headers: {
-									'Content-Type': 'application/json',
-									'Accept': 'application/json',
-								},
-
-							}).then(
-								respose => {
-									this.ShowRegistrationBox();
+								method: 'get',
+								url: 'http://localhost:3000/members/' + this.Username,
+								headers:{
+									'Content-Type' : 'application/json',
+									'Accept' : 'application/json',
 								}
-							);
+							}).then((response) => {	
+								if(!response.data){
+									const data = {
+										"name": this.Fullname,
+										"username" : this.Username,
+										"password" : this.ConfirmPassword
+									}
+									axios({
+										method: 'post',
+										url: 'http://localhost:3000/members',
+										data : data,
+										headers: {
+											'Content-Type': 'application/json',
+											'Accept': 'application/json',
+										},
+
+									}).then(
+										respose => {
+											this.ShowRegistrationBox();
+										}
+									);
+								}
+								else {
+									this.UserNameErrorMessage = 'Username already exists.';
+								}
+							}).catch((error) => {
+								console.log(error);
+							});
 						}
 					}
 				},

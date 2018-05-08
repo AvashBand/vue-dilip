@@ -23,7 +23,7 @@
 							  		<th scope="col">Update</th>
 							  		<th scope="col">Delete</th>
 							    </tr>
-							    <tr>
+<!-- 							    <tr>
 							    	<td>1</td>
 							    	<td>Momo</td>
 							    	<td>Rs. 80</td>
@@ -33,6 +33,18 @@
 							    	<td>
 							    		<i v-on:click="show_delete_food_popup" class="button-glyphicons glyphicon glyphicon-trash"></i>
 							    	</td>
+							    </tr> -->
+
+							    <tr v-for="(food, index) in Foods">
+							        <td> {{ index + 1 }} </td>
+							        <td>{{ food.name }}</td>
+							        <td>{{ food.price }} </td>
+							        <td>
+							        	<i v-on:click="show_update_food_popup" class="button-glyphicons glyphicon glyphicon-edit"></i>
+							        </td>
+							        <td>
+							        	<i v-on:click="show_delete_food_popup" class="button-glyphicons glyphicon glyphicon-trash"></i>
+							        </td>
 							    </tr>
 							</table>
 						</div>
@@ -121,6 +133,9 @@
 </template>
 
 <script>
+	import axios from 'axios'
+	import qs from 'qs'
+
 	export default{
 		data(){
 			return{
@@ -130,10 +145,28 @@
 				food_name: '',
 				food_price: '',
 				name_error: '',
-				price_error: ''
+				price_error: '',
+				Foods : []
 			}
 		},
+		created(){
+			this.populate_food_table();
+		},
 		methods: {
+			populate_food_table(){
+				this.Foods = [];
+				axios( {
+					method: 'get',
+					url: 'http://localhost:3000/foods',
+					headers:{
+						'Content-Type' : 'application/json',
+						'Accept' : 'application/json',
+						'x-auth': localStorage.getItem('token')
+					}
+				}).then((response) => { 
+					this.Foods = response.data; 
+				});
+			},
 			//ADD
 			show_add_food_popup: function(){
 				this.bool_show_add_popup = true;
@@ -157,7 +190,25 @@
 			},
 			store_food_data: function(){
 				//Store query goes here.
-				alert('jdsakldjsakldjas');
+				const data = {
+					'name' : this.food_name,
+					'price' : this.food_price
+				};
+				console.log(data);
+				axios({
+					method: 'post',
+					url: 'http://localhost:3000/foods',
+					data : data,
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept': 'application/json',
+						'x-auth': localStorage.getItem('token')
+					},
+				}).then(
+					respose => {
+						this.populate_food_table();
+					}
+				).catch((error) => { alert(error) });
 				this.bool_show_add_popup = false;
 			},
 

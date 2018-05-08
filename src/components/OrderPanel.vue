@@ -6,9 +6,10 @@
 		</button>	
 		<div id="page-container">
 			<div>
-				<span class=" user-addressing" style="font-size:20px;box-shadow: 2px 2px 4px #888888; background-color:#ff0b63; padding:3px; color:white; position:relative;top:-10px; right:10px;">
+<!-- 				<span class=" user-addressing" style="font-size:20px;box-shadow: 2px 2px 4px #888888; background-color:#ff0b63; padding:3px; color:white; position:relative;top:-10px; right:10px;"> -->
+				<span>
 					Welcome
-					<span style="font-size: 18px; font-weight:normal;">{{ UserName }}!</span>
+					<span style="font-size: 18px; font-weight:normal;">{{ full_name }}!</span>
 				</span>
 			</div>
 			<div class="table-area w3-container w3-center w3-animate-opacity" v-if="!ShowOrderPanel">
@@ -25,12 +26,12 @@
 				    <th>Price</th>
 				    <th>Order</th>
 				  </tr>
-				  <tr>
-				    <td>1</td>
-				    <td>Momo</td>
-				    <td>Rs.100</td>
+				  <tr v-for="(food, index) in Foods">
+				    <td> {{ index + 1 }} </td>
+				    <td>{{ food.name }}</td>
+				    <td>{{ food.price }}</td>
 				    <td>
-				    	<button class="btn btn-primary" v-on:click="Show">Order</button>
+				    	<button class="btn btn-primary" v-on:click="CreateOrder" :value="food._id">Order</button>
 				    </td>
 				  </tr>
 				  </tr>
@@ -58,17 +59,58 @@
 	</div>
 </template>
 <script>
+	import axios from 'axios'
+	import qs from 'qs'
+
 	export default{
 		data(){
 			return{
 				ShowLogoutBox : false,
 				ShowOrderPanel : false,
 				Food : 'Momo',
-				UserName : 'Gagan Rai'
+				Foods : [],
+				UserName : '',
+				orderedFood: {
+					order_id : '',
+					food_name : ''
+				}
 			}
 		},
+		created(){
+			this.username = localStorage.getItem('username');
+			this.full_name = localStorage.getItem('full_name');
+			axios({
+				method: 'get',
+				url: 'http://localhost:3000/foods',
+				headers:{
+					'Content-Type' : 'application/json',
+					'Accept' : 'application/json',
+					// 'x-auth' : 'Bearer ' + localStorage.getItem('token'),
+					'x-auth': localStorage.getItem('token')
+				}
+			}).then((response) => { 
+				this.Foods = response.data; 
+			});
+		},
 		mounted(){
-			this.ShowOrderPanel = false;
+			// axios({
+			// 	method: 'get',
+			// 	url: 'http://foods.test/api/order/hasordered',
+			// 	headers:{
+			// 		'Content-Type' : 'application/json',
+			// 		'Accept' : 'application/json',
+			// 		'x-auth' : 'Bearer ' + localStorage.getItem('token'),
+			// 	}
+			// }).then(
+			// 	response => {
+			// 		if (response.data.hasOrdered) 
+			// 		{
+			// 			this.orderedFood.order_id = response.data.order_id;
+			// 			this.orderedFood.food_name = response.data.food_name;
+			// 			this.ShowOrderPanel = true;
+			// 		}
+			// 	}
+			// );	
 		},
 		methods:{
 			Show : function(){
@@ -87,6 +129,50 @@
 			},
 			ReverseDivisions: function(){
 				this.ShowOrderPanel = false;
+			},
+			// CancelOrder: function(){
+			// 	axios({
+			// 		method: 'put',
+			// 		url: 'http://localhost:3000/orders' + this.orderedFood.order_id,
+			// 		headers:{
+			// 			'Content-Type' : 'application/json',
+			// 			'Accept' : 'application/json',
+			// 			'Authorization' : 'Bearer ' + localStorage.getItem('token'),
+			// 		}
+			// 	}).then( 
+			// 		response => { 
+			// 			this.orderedFood.order_id = '';
+			// 			this.orderedFood.food_name = ''; 								
+			// 			this.ShowOrderPanel = false;
+			// 		}
+			// 	 );
+			// },
+			CreateOrder: function(e){
+				const data = {
+					'username' : this.UserName,
+					'user_fullname' : '',
+					'food_id' : e.target.value,
+					'food_name' : ''
+				}
+				axios({
+					method: 'post',
+					url: 'http://localhost:3000/orders',
+					data: data,
+					headers:{
+						'Content-Type' : 'application/json',
+						'Accept' : 'application/json',
+						'x-auth' : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YWYwMmE4MjM2ZWQ5ZjI3NThmMThiOTgiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTI1NzUyNzgyfQ.DgEz0Ytcwjidj0UR6aMo8vuq04x_4YC_uM12QPkSl5w',
+					}
+				}).then(
+					response => {
+						console.log(response);
+						// if (response.status == 201) {
+						// 	this.orderedFood.order_id = response.data.order_id;
+						// 	this.orderedFood.food_name = response.data.food_name; 								
+						// 	this.Show();
+						// }
+					}	
+				);
 			}
 		}
 	}

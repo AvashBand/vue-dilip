@@ -41,7 +41,7 @@
 		<div class="popup-div-wrapper"  v-bind:class="{showBoxAndBoxAnimation:bool_show_login_error_popup}">
 			<div class="delete-box">
 				<div class="delete-message">
-					<p style="margin-bottom: 10px; font-size: 18px; font-weight: 600;">Your ID hasn't been approved by admin yet. Sorry for the inconvenience. </p>
+					<p style="margin-bottom: 10px; font-size: 18px; font-weight: 600;"> {{ login_error_message }} </p>
 				</div>
 				<div style="display: flex; align-items: center; justify-content: center;">
 					<button v-on:click="hide_login_error_popup" class="btn btn-danger" style="margin-right: 10px; width: 100px;">Close</button>
@@ -70,7 +70,7 @@ import qs from 'qs'
 				password_error : '',
 				username_and_password_Error : '',
 
-
+				login_error_message : '',
 				bool_show_login_error_popup: false
 
 			}
@@ -101,12 +101,34 @@ import qs from 'qs'
 						}
 					}).then((response) => {
 						console.log(response.data);
-						console.log(response.headers);
+						if(!response.data){
+							this.show_login_error_popup("Username or password error");
+							return;
+						} 
+						//Normal User access
+						if(response.data.member_data.is_active == true){
+							localStorage.setItem('token', response.data.x_auth);
+							localStorage.setItem('username', response.data.member_data.username);
+							localStorage.setItem('full_name', response.data.member_data.name);
+							localStorage.setItem('is_active', response.data.member_data.is_active);
+							localStorage.setItem('is_admin', response.data.member_data.is_admin);
+							//Admin Access
+							if(response.data.member_data.is_admin == true){
+								this.$router.push('/usertable');
+								return;
+							} 
+							this.$router.push('/order');
+						} else{
+							this.show_login_error_popup("Your ID hasn't been approved by admin yet. Sorry for the inconvenience.");
+						}
 
-					}).catch((e) => { console.log("Cannot post data. \n " , e)});
+					}).catch((e) => {
+						this.show_login_error_popup("Server error. Please try again later.");
+					});
 				}
 			},	
-			show_login_error_popup: function(){
+			show_login_error_popup: function(error_msg){
+				this.login_error_message = error_msg;
 				this.bool_show_login_error_popup = true;
 			},
 			hide_login_error_popup: function(){
@@ -299,3 +321,40 @@ import qs from 'qs'
 		100% {opacity : 1}
 	}
 </style>
+
+<!-- 
+.then( (response) => {
+						console.log(response);
+						localStorage.setItem('token', response.data.access_token);
+						localStorage.setItem('expiration', response.data.expires_in + Date.now());
+						axios({
+							method: 'get',
+							url: 'http://foods.test/api/user',
+							data: data,
+							headers: {
+								'Content-Type' : 'application/json',
+								'Accept' : 'application/json',
+								'Authorization' : 'Bearer ' + response.data.access_token,
+							}
+						}).then((response) => {
+							if(!response.data){
+								alert('User not found');
+								return;
+							}
+							localStorage.setItem('name', response.data.name);
+							localStorage.setItem('username', response.data.username);
+							localStorage.setItem('is_active', response.data.is_active);
+							localStorage.setItem('is_admin', response.data.is_admin);
+
+							if (localStorage.getItem('is_active') != null && localStorage.getItem('is_active') == 0){
+								this.show_login_error_popup();
+								return;
+							}									
+							if (localStorage.getItem('is_admin') != null && localStorage.getItem('is_admin') != 0){
+								this.$router.push('/usertable');
+								return;
+							}
+
+							this.$router.push('/fullui');
+						}
+					).catch((e) => { }) -->

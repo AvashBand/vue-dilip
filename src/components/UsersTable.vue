@@ -1,7 +1,7 @@
 <template>
 	<div class="container-fluid">
 		<Menu-Bar></Menu-Bar>
-		<div id="PageContainer" v-bind:class="PageContainerTransition" style="visibility: visible;">
+		<div id="PageContainer" style="visibility: visible;"> <!-- v-bind:class="PageContainerTransition" -->
 			<div class="Dashboard">
 				<span style="font-weight:bold; font-size:20pt; padding-right:10px;">
 					<i class= "glyphicon glyphicon-user" style="font-size:18px; margin:0px 20px;"></i>User Table
@@ -18,18 +18,25 @@
 					  	<th>Status</th>
 					  	<th>Delete</th>
 					  </tr>
-					  <tr>
-					  	<td>1</th>
-					  	<td>Ram</td>
-					  	<td>Ram Bhandari</td>
-					  	<td>
-					  		<label class="switch">
-					  		  <input type="checkbox" checked/>
-					  		  <span class="slider round"></span>
-					  		</label>
+
+					  <tr v-for="(user, index) in Members">
+					      <td> {{ index + 1 }} </td>
+					      <td>{{ user.username }}</td>
+					      <td>{{ user.name }} </td>
+					      <td>
+			  		      	<label class="switch">
+			  			      	<div v-if="user.is_active">
+			  			      	  <input type="checkbox" checked/>
+			  			      	  <span class="slider round" v-on:click="toggle_user_is_active" v-bind:id="user._id"></span>
+			  			      	</div>
+			  			      	<div v-else>
+			  			      		<input type="checkbox" unchecked />
+			  			      		<span class="slider round" v-on:click="toggle_user_is_active" v-bind:id="user._id"></span>
+			  			      	</div>
+			  		      	</label>
 					  	</td>
 					  	<td>
-					  		<i v-on:click="show_delete_food_popup" class="button-glyphicons glyphicon glyphicon-trash"></i>
+					  		<i v-on:click="show_delete_food_popup"  v-bind:id="user._id" class="button-glyphicons glyphicon glyphicon-trash"></i>
 					  	</td>
 					  </tr>
 					</table>
@@ -51,14 +58,63 @@
 </template>
 
 <script>
+	import axios from 'axios'
+	import qs from 'qs'
+
 	export default{
 		data(){
 			return{
 				SideBarOpened : false,
-				bool_show_delete_popup: false
+				bool_show_delete_popup: false,
+				Members: [],
+				member_id : ''
 			}
 		},
+		created(){
+			axios( {
+				method: 'get',
+				url: 'http://localhost:3000/members/',
+				headers:{
+					'Content-Type' : 'application/json',
+					'Accept' : 'application/json',
+					// 'x-auth' : 'Bearer ' + localStorage.getItem('token'),
+					'x-auth': localStorage.getItem('token')
+				}
+			}).then((response) => { 
+				this.Members = response.data; 
+			});
+		},
 		methods:{
+			toggle_user_is_active: function(e){
+				this.member_id = e.target.id;
+				axios({
+					method: 'patch',
+					url: 'localhost:3000/members/5af0726447ab54214873ee48',
+					headers:{
+						'Content-Type' : 'application/json',
+						'Accept' : 'application/json',
+						'x-auth': localStorage.getItem('token')
+					},
+					body: {
+						is_active: true
+					}
+				}).then((response) => {
+					alert('ID deactivated');
+				});
+			},
+			delete_food: function() {
+				axios({
+					method: 'delete',
+					url: 'localhost:3000/members/' + this.member_id,
+					headers:{
+						'Content-Type' : 'application/json',
+						'Accept' : 'application/json',
+						'x-auth': localStorage.getItem('token')
+					}
+				}).then((response) => {
+					console.log(response);
+				});
+			},
 			ToggleSideBar : function(){
 				if(document.getElementById("PageContainer").style.marginLeft == "260px"){
 					this.SideBarOpened = true;
@@ -71,15 +127,14 @@
 			},
 
 			//Delete
-			show_delete_food_popup: function(){
-				this.bool_show_delete_popup = true;
+			show_delete_food_popup: function(e){
+				this.member_id = e.target.id;
+				this.bool_show_delete_popup = true;			
 			},
 			hide_delete_food_popup: function(){
 				this.bool_show_delete_popup = false;
-			},
-			delete_food: function(){
-				//Delete Query goes here
-			},
+				this.member_id = '';
+			}
 		},
 		mounted(){
 			

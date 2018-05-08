@@ -8,7 +8,9 @@
 					<p>It looks like you're lost.</p>
 				</div>
 				<img class="error-image" src="../assets/Error404.png"><br/>
-				<button class="btn btn-lg" style=""> TAKE ME OUT OF HERE</button>
+				<a href="/">
+					<button class="btn btn-lg" style=""> TAKE ME OUT OF HERE</button>
+				</a>
 			</div>
 		</div>
 	</div>

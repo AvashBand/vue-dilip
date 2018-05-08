@@ -19,13 +19,13 @@
 					    	<th scope="col">Date</th>
 					    	<th scope="col">Time</th>
 					    </tr>
-					    <tr>
-					    	<td>1</td>
-					    	<td>Ram</td>
-					    	<td>Momo</td>
-					    	<td>Received</td>
-					    	<td>2075/1/8</td>
-					    	<td>10:00pm</td>
+					    <tr v-for="(order, index) in Orders">
+					    	<td>{{ index + 1 }}</td>
+					    	<td>{{ order.username }}</td>
+					    	<td>{{ order.food_name }}</td>
+					    	<td>{{ order.is_cancelled }}</td>
+					    	<td>{{ order.updated_at }}</td>
+					    	<!-- <td>{{ order._id }}</td> -->
 					    </tr>
 					</table>
 				</div>
@@ -33,6 +33,60 @@
 		</div>
 	</div>
 </template>
+
+<script>
+	import axios from 'axios'
+	import qs from 'qs'
+
+	export default{
+		data(){
+			return{
+				SideBarOpened : false,
+				Orders: []
+			}
+		},
+		created(){
+			axios( {
+				method: 'get',
+				url: 'http://localhost:3000/orders/',
+				headers:{
+					'Content-Type' : 'application/json',
+					'Accept' : 'application/json',
+					// 'x-auth' : 'Bearer ' + localStorage.getItem('token'),
+					'x-auth': localStorage.getItem('token')
+				}
+			}).then((response) => { 
+				this.Orders = response.data; 
+			});
+		},
+		methods:{
+			ToggleSideBar : function(){
+				if(document.getElementById("PageContainer").style.marginLeft == "260px"){
+					this.SideBarOpened = true;
+					console.log(this.SideBarOpened);
+				}
+				else{
+					this.SideBarOpened = false;
+					console.log(this.SideBarOpened);
+				}
+			},
+
+			//Delete
+			show_delete_food_popup: function(){
+				this.bool_show_delete_popup = true;
+			},
+			hide_delete_food_popup: function(){
+				this.bool_show_delete_popup = false;
+			},
+			delete_food: function(){
+				//Delete Query goes here
+			},
+		},
+		mounted(){
+			
+		}
+	}
+</script>
 <style scoped>
 	.btn{
 		border-radius: 0px;

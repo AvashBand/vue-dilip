@@ -5,7 +5,7 @@
 		<!-- <Sidebar-nav></Sidebar-nav>	 -->
 		<div class="container-fluid">
 			<div class="side-bar"><!-- col-md-2 cancel-default-padding-of-col-md-2  -->
-				<div id="MySideNav" class="sidenav" v-bind:class="SidenavTransition">
+				<div id="MySideNav" class="sidenav">  <!-- v-bind:class="SidenavTransition" -->
 					<ul class="menu-list">
 						<!-- <li v-for="Menu in MenuItems">
 							<a class="menu-item" v-bind:class="Active">
@@ -69,7 +69,7 @@
 			        </ul>
 			        <form class="form-inline mt-2 mt-md-0">
 			            <div class="MenuBtn">
-			            	<button type="button" style="border-radius:0px; margin-right:30px;" class="btn btn-outline-light" v-on:click="Show">Log Out</button>
+			            	<button type="button" style="border-radius:0px; margin-right:30px;" class="btn btn-outline-light" v-on:click="show_logout_box">Log Out</button>
 			          	</div>
 			        </form>
 			    </div>
@@ -77,14 +77,16 @@
 		</div>
 
 		<!-- Log Out Popup -->
-		<div class="popup-div-wrapper"  v-bind:class="{showBoxAndBoxAnimation:ShowLogoutBox}">
-			<div class="logoutBox" :class="{ShowBox:ShowLogoutBox}">
+		<div class="logout-popup-div-wrapper"  v-bind:class="{ showLogoutPopupDivWrapper: bool_show_wrapper}">
+			<div class="logoutBox" v-bind:class="{showLogoutBoxAnimation : bool_show_logout_popup }">
 				<div class="LogoutMessage">
 					<p>Are you sure you want to log out?</p>
 				</div>
 				<div class="button-area">
-					<button class="btn btn-primary btn-lg" style="margin-right: 10px;" v-on:click="Navigate">Logout</button>
-					<button class="btn btn-danger btn-lg" v-on:click="CancelLogout">Cancel</button>
+					<a> 
+						<button class="btn btn-primary" style="margin-right: 10px;" v-on:click="Navigate">Logout</button>
+					</a>
+					<button class="btn btn-danger" v-on:click="Cancel_and_hide_Logout_box">Cancel</button>
 				</div>
 			</div>			
 		</div>
@@ -122,12 +124,14 @@
 		data(){
 	    	return{
 	    		Active : '',
-	    		ShowLogoutBox : false,
 	    		MenuButton : 'glyphicon-tasks',
 	    		UserTableMenu : '',
 	    		FoodTableMenu : '',
 	    		OrderRecordsMenu : '',	    		
 	    		SideBarOpened : false,
+	    		bool_show_logout_popup: false,
+	    		bool_show_wrapper: false,
+	    		go_to_logout: false
 
 	    		//ClickEventChangeTransition
 	    		// SidenavTransition : '',
@@ -137,14 +141,22 @@
 	    	}
 	  	},
 	  	methods:{
-	  		Show : function(){
-	  			this.ShowLogoutBox = true;
+	  		show_logout_box : function(){
+	  			this.bool_show_logout_popup = true;
+	  			this.bool_show_wrapper = true;
 	  		},
-	  		CancelLogout : function(){
-	  			this.ShowLogoutBox = false;
+	  		Cancel_and_hide_Logout_box : function(){
+	  			this.bool_show_logout_popup = false;
+	  			this.bool_show_wrapper = false;
 	  		},
 	  		Navigate : function(){
+	  			localStorage.setItem('token', '');
+	  			localStorage.setItem('username', '');
+	  			localStorage.setItem('full_name', '');
+	  			localStorage.setItem('is_active', '');
+	  			localStorage.setItem('is_admin', '');
 	  			this.$router.push('/');
+	  			// logout_route = '/'
 	  		},
 	  		ShowSideBar : function(){
 	  			this.MenuButton = 'glyphicon-tasks';
@@ -176,7 +188,7 @@
 	
 <!-- Style For MenuBar and Logout PopUp -->
 <style scoped>
-	.popup-div-wrapper{
+	.logout-popup-div-wrapper{
 		position: fixed;
 		z-index: 10;
 		top: 0;
@@ -185,6 +197,17 @@
 		height: 100%;
 		width: 100%;
 		visibility: hidden;
+	}
+	.showLogoutPopupDivWrapper{
+		visibility: visible;
+		animation: reappear 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+		transform: translate3d(0, 0, 0);
+		backface-visibility: hidden;
+		perspective: 1000px;
+	}
+	@keyframes reappear {
+		0% { opacity: 0 }
+		100% {opacity : 1}
 	}
 	.router-link{
 		text-decoration: none;
@@ -220,7 +243,7 @@
 		align-items: center;
 		justify-content: center;
 	}
-	.ShowBox{
+	.showLogoutBoxAnimation{
 		visibility: visible;
 		animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 		transform: translate3d(0, 0, 0);
@@ -347,13 +370,6 @@
 	}
 	.menu-option-active{
 		background-color: #cc0052;
-	}
-	.showBoxAndBoxAnimation{
-		visibility: visible;
-		animation: shake 0.1s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-		transform: translate3d(0, 0, 0);
-		backface-visibility: hidden;
-		perspective: 1000px;
 	}
 /*	@keyframes shake {
 		0% { opacity: 0 }

@@ -8,7 +8,9 @@
 					<p>The page you were trying to request is absolutely forbidden for some reasons.</p>
 				</div>
 				<img class="error-image" src="../assets/Error403.png"><br/>
-				<button class="btn btn-lg" style=""> TAKE ME OUT OF HERE</button>
+				<a href="/">
+					<button class="btn btn-lg" style=""> TAKE ME OUT OF HERE</button>
+				</a>
 			</div>
 		</div>
 	</div>
