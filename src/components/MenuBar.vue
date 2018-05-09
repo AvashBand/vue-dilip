@@ -45,6 +45,16 @@
 								</div>
 							</router-link>
 						</li>
+						<li>
+							<a href="/order" style="text-decoration:none;">
+								<div class="menu-item" v-bind:class="orderAFoodItem">
+									<span class="menu-icon">
+										<i class= "glyphicon glyphicon-calendar"></i>
+										<span class="menu-name"> Order a food item</span>
+									</span>
+								</div>
+							</a>
+						</li>
 					</ul>
 				</div>
 			</div>
@@ -55,7 +65,7 @@
 
 			<nav class="navbar navbar-expand-md navbar-fixed-top" style="background-color:#ff1a75;">
 				<div class="menu-header">
-					<span class="menu-show-button">
+					<span id="menu-show-button">
 						<i class= "glyphicon " v-bind:class="MenuButton"></i>
 					</span>
 					<span style="float:right;">
@@ -108,7 +118,10 @@
 						break;
 				case '/orderrecords' :
 						this.OrderRecordsMenu = 'menu-option-active';
-						;
+						break;
+				case '/order' :
+						this.orderAFoodItem = 'menu-option-active';
+						break;
 				default:
 						break;
 			}
@@ -127,7 +140,8 @@
 	    		MenuButton : 'glyphicon-tasks',
 	    		UserTableMenu : '',
 	    		FoodTableMenu : '',
-	    		OrderRecordsMenu : '',	    		
+	    		OrderRecordsMenu : '',
+	    		orderAFoodItem : '',	    		
 	    		SideBarOpened : false,
 	    		bool_show_logout_popup: false,
 	    		bool_show_wrapper: false,
@@ -326,7 +340,7 @@
 		top:0px;
 		left: 0px;  
 	}
-	.menu-show-button{
+	#menu-show-button{
 		transition: 0.3s;
 	}
 	.menu-show-button:hover{

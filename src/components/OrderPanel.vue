@@ -4,9 +4,8 @@
 		<button id="logo" class="success-div" v-bind:class="{ShowBox:ShowLogoutBox}" v-on:click="CancelLogout">
 			 <i class= "glyphicon glyphicon-ok"></i>
 		</button>	
-		<div id="page-container">
+		<div id="PageContainer">
 			<div>
-<!-- 				<span class=" user-addressing" style="font-size:20px;box-shadow: 2px 2px 4px #888888; background-color:#ff0b63; padding:3px; color:white; position:relative;top:-10px; right:10px;"> -->
 				<span>
 					Welcome
 					<span style="font-size: 18px; font-weight:normal;">{{ full_name }}!</span>
@@ -27,17 +26,15 @@
 				    <th>Order</th>
 				  </tr>
 				  <tr v-for="(food, index) in Foods">
-				    <td> {{ index + 1 }} </td>
+				    <td>{{ index + 1 }}</td>
 				    <td>{{ food.name }}</td>
 				    <td>{{ food.price }}</td>
 				    <td>
-				    	<button class="btn btn-primary" v-on:click="CreateOrder" :value="food._id">Order</button>
+				    	<button class="btn btn-primary" style="border-radius:0px;" v-bind:id="food._id" v-on:click="create_order">Order</button>
 				    </td>
-				  </tr>
 				  </tr>
 				</table>
 			</div>
-
 			<div class="table-area w3-container w3-center w3-animate-opacity" v-if="ShowOrderPanel">
 				<div>
 					<div class="order-completed">
@@ -47,10 +44,14 @@
 						<img class="ordered-image" src="../assets/EmptyPlate.png">
 					</div>
 					<div class="ordered-item">
-						<span style="font-weight:600; padding-right:20px;">Ordered Item:</span>{{ Food }}
+						<span style="font-weight:600; padding-right:20px;">Ordered Item:</span>{{ food_name }}
+						<div>
+							<span style="font-weight:600; font-size:20px; padding-right:20px;">Ordered Time:</span>
+							<span style="font-size:20px; padding-right:20px;"> {{ order_time }}</span>
+						</div>
 						<div class="button-area" style="padding-top: 50px;">
 							<span class="margin-right:30px; font-size:20px">Want to cancel your order?</span>
-							<button class="btn btn-success btn-lg" v-on:click="ReverseDivisions">Click Here</button>
+							<button class="btn btn-success btn-lg" v-on:click="cancel_order">Click Here</button>
 						</div>
 					</div>
 				</div>
@@ -60,60 +61,107 @@
 </template>
 <script>
 	import axios from 'axios'
-	import qs from 'qs'
 
 	export default{
 		data(){
 			return{
 				ShowLogoutBox : false,
 				ShowOrderPanel : false,
-				Food : 'Momo',
-				Foods : [],
 				UserName : '',
-				orderedFood: {
-					order_id : '',
-					food_name : ''
-				}
+				full_name : '',
+				Foods: [],
+				food_id: '',
+
+				order_id: '',
+				order_time : '',
+				food_name : ''
 			}
 		},
 		created(){
-			this.username = localStorage.getItem('username');
+			this.UserName = localStorage.getItem('username');
 			this.full_name = localStorage.getItem('full_name');
-			axios({
-				method: 'get',
-				url: 'http://localhost:3000/foods',
-				headers:{
-					'Content-Type' : 'application/json',
-					'Accept' : 'application/json',
-					// 'x-auth' : 'Bearer ' + localStorage.getItem('token'),
-					'x-auth': localStorage.getItem('token')
-				}
-			}).then((response) => { 
-				this.Foods = response.data; 
-			});
+			this.populate_food_table();
 		},
 		mounted(){
-			// axios({
-			// 	method: 'get',
-			// 	url: 'http://foods.test/api/order/hasordered',
-			// 	headers:{
-			// 		'Content-Type' : 'application/json',
-			// 		'Accept' : 'application/json',
-			// 		'x-auth' : 'Bearer ' + localStorage.getItem('token'),
-			// 	}
-			// }).then(
-			// 	response => {
-			// 		if (response.data.hasOrdered) 
-			// 		{
-			// 			this.orderedFood.order_id = response.data.order_id;
-			// 			this.orderedFood.food_name = response.data.food_name;
-			// 			this.ShowOrderPanel = true;
-			// 		}
-			// 	}
-			// );	
+			this.check_for_order();	
+			// alert(this.food_name);
+			// alert(this.ShowOrderPanel);
+
+			if(localStorage.getItem('is_admin') == 'true') {
+				this.MenuButton = 'glyphicon-tasks';
+				document.getElementById("MySideNav").style.width = "inherit";
+				document.getElementById("PageContainer").style.marginLeft = "260px";
+				document.getElementById("PageContainer").style.width = "calc(100% - 20.3%)";
+				this.SideBarOpened = true;
+			}
+			else{
+				document.getElementById("menu-show-button").style.visibility = "hidden";
+				document.getElementById("MySideNav").style.visibility = "hidden";	
+				document.getElementById("PageContainer").style.marginLeft = "10px";
+				document.getElementById("PageContainer").style.width = "98%";
+				this.SideBarOpened = false;
+			}
 		},
 		methods:{
-			Show : function(){
+			populate_food_table: function(){
+				axios({
+					method: 'get',
+					url: 'http://localhost:3000/foods',
+					headers:{
+						'Content-Type' : 'application/json',
+						'Accept' : 'application/json',
+						'x-auth': localStorage.getItem('token')
+					}
+				}).then((response) => { this.Foods = response.data; });
+			},
+			check_for_order: function(){
+				axios({
+					method: 'get',
+					url: 'http://localhost:3000/orders/check/',
+					headers:{
+						'Content-Type' : 'application/json',
+						'Accept' : 'application/json',
+						'x-auth': localStorage.getItem('token')
+					}
+				}).then((response) => {
+					if(response.data.order[0]){
+						console.log(response.data.order[0]);
+						this.order_id = response.data.order[0].id;
+						this.food_name = response.data.order[0].food_name;
+						this.order_time = response.data.order[0].time;
+						this.ShowOrderPanel = true;
+					} else {
+						this.ShowOrderPanel = false;
+					}	
+				}).catch((error) => {
+					console.log(error);
+				});
+			},
+			create_order : function(e){
+				const data = {
+					food_id : e.target.id
+				}
+				axios({
+					method: 'post',
+					url: 'http://localhost:3000/orders/',
+					data : data,
+					headers:{
+						'Content-Type' : 'application/json',
+						'Accept' : 'application/json',
+						'x-auth': localStorage.getItem('token')
+					}
+				}).then((response) => {
+					if(response.data.order[0]){
+						console.log(response.data.order[0]);
+						this.food_name = response.data.order[0].food_name;
+						this.order_time = response.data.order[0].time;
+						this.ShowOrderPanel = true;
+					} else {
+						this.ShowOrderPanel = false;
+					}	
+				}).catch((error) => {
+					console.log(error);
+				});
 				this.ShowLogoutBox = true;
 				var self = this;
 				setTimeout(function(){
@@ -121,72 +169,39 @@
 					self.ShowOrderPanel = true;	
 				}, 830);
 			},
+			cancel_order: function(){
+				axios({
+					method: 'patch',
+					url: 'http://localhost:3000/orders/',
+					headers:{
+						'Content-Type' : 'application/json',
+						'Accept' : 'application/json',
+						'x-auth': localStorage.getItem('token')
+					}
+				}).then((response) => {
+					if(response.data.order[0].id){
+						console.log(response.data.order[0]);
+						this.food_name = response.data.order[0].food_name;
+						this.order_time = response.data.order[0].time;
+						this.ShowOrderPanel = true;
+						alert('order cancelled.');
+					} else {
+						this.ShowOrderPanel = false;
+					}	
+				}).catch((error) => {
+					console.log(error);
+				});
+			},
 			CancelLogout : function(){
 				this.ShowLogoutBox = false;
 			},
 			Navigate : function(){
 				this.$router.push('/');
-			},
-			ReverseDivisions: function(){
-				this.ShowOrderPanel = false;
-			},
-			// CancelOrder: function(){
-			// 	axios({
-			// 		method: 'put',
-			// 		url: 'http://localhost:3000/orders' + this.orderedFood.order_id,
-			// 		headers:{
-			// 			'Content-Type' : 'application/json',
-			// 			'Accept' : 'application/json',
-			// 			'Authorization' : 'Bearer ' + localStorage.getItem('token'),
-			// 		}
-			// 	}).then( 
-			// 		response => { 
-			// 			this.orderedFood.order_id = '';
-			// 			this.orderedFood.food_name = ''; 								
-			// 			this.ShowOrderPanel = false;
-			// 		}
-			// 	 );
-			// },
-			CreateOrder: function(e){
-				const data = {
-					'username' : this.UserName,
-					'user_fullname' : '',
-					'food_id' : e.target.value,
-					'food_name' : ''
-				}
-				axios({
-					method: 'post',
-					url: 'http://localhost:3000/orders',
-					data: data,
-					headers:{
-						'Content-Type' : 'application/json',
-						'Accept' : 'application/json',
-						'x-auth' : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YWYwMmE4MjM2ZWQ5ZjI3NThmMThiOTgiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTI1NzUyNzgyfQ.DgEz0Ytcwjidj0UR6aMo8vuq04x_4YC_uM12QPkSl5w',
-					}
-				}).then(
-					response => {
-						console.log(response);
-						// if (response.status == 201) {
-						// 	this.orderedFood.order_id = response.data.order_id;
-						// 	this.orderedFood.food_name = response.data.food_name; 								
-						// 	this.Show();
-						// }
-					}	
-				);
 			}
 		}
 	}
 </script>
 <style>
-	.btn{
-		border-radius: 0px;
-	}
-	td, th{
-		text-align: center;
-	}
-	body{
-		background-color: #ffe5ec;
-	}
 	.success-div{
 		outline: none;
 		visibility: hidden;
@@ -232,26 +247,31 @@
 	  70% {opacity : 1}
 	  100% { opacity: 0; visibility: hidden;}
 	}
-	.menu-show-button{
+/*	.menu-show-button{
 		visibility: hidden;
 	}
 	.side-bar{
 		visibility: hidden;
-	}
+	}*/
 	.container-fluid{
 		margin: 0px;
 		padding: 0px;
 		background-color: #ffe5ec;
 	}
-	#page-container{
+	#PageContainer{
+		background-color: white;
+		/*left: calc(238px);*/
+		padding: 15px;
+		width: 98%;
+		margin: 60px 10px -11px 10px;
 		min-height: 590px;
 		max-height: 590px;
-		background-color: white;
+/*		background-color: white;
 		position:static;
 		padding: 15px;
 		transition: 0.2s;
 		width: auto;
-		margin: 60px 10px -11px 10px;
+		margin: 60px 10px -11px 10px;*/
 	}
 	.user-addressing{
 		font-size: 25px; 
@@ -268,7 +288,7 @@
 		transition: 0.3s;
 	}
 	.ordered-item{
-		padding: 40px;
+		padding: 20px;
 		font-size:30px;
 		text-align:center;
 		transition: 0.3s;
@@ -279,9 +299,9 @@
 		transition: 0.3s;
 	}
 	.btn-lg{
-		font-size: 20px;
+		font-size: 16px;
+		margin-left: 20px;
 		transition: 0.3px;
-		margin-left: 10px;
 	}
 	@media screen and (max-width: 1000px){
 		.order-completed{
@@ -300,19 +320,20 @@
 			transition: 0.3s;
 		}
 		.btn-lg{
-			font-size: 15px;
+			font-size: 10px;
 			transition: 0.3px;
 		}
 	}
 	table {
 	    border-collapse: collapse;
 	    border-spacing: 0;
-	    width: 100%;
+	    width: 90%;
 	    border: 1px solid #ddd;
+	    margin: 0 auto;
 	}
 
 	th, td {
-	    text-align: left;
+	    text-align: center;
 	    padding: 10px;
 	}
 

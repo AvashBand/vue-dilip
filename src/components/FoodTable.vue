@@ -169,6 +169,7 @@
 			},
 			//ADD
 			show_add_food_popup: function(){
+				this.clear_text_box();
 				this.bool_show_add_popup = true;
 			},
 			hide_add_food_popup: function(){
@@ -214,6 +215,7 @@
 
 			//Update
 			show_update_food_popup: function(){
+				this.clear_text_box();
 				this.bool_show_update_popup = true;
 			},
 			hide_update_food_popup: function(){

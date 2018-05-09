@@ -7,19 +7,6 @@
 		</div>
 	
 	<!-- Info -->
-	<div>
-		<div class="registration-successful-box" v-if="showthebox" v-bind:class="BoxAnimation"><!-- v-bind:class="BoxAnimation" -->
-			<div class="w3-center">
-				<p style="font-size:30px; font-weight:600; padding:5px 0; margin:0;">Registration Successful <i style="margin-left:10px;" class="glyphicon glyphicon-thumbs-up"></i></p>
-				<div style="background-color: rgb(210, 3, 98); padding:10px; width:500px; margin: 0 auto; border-radius:10px;">
-					<p style="font-weight:600; font-size:13px; margin-bottom:8px;">But first</p>
-					<p style="font-weight:600;">Your account has to be approved by admin in order to login.</p>
-					<router-link to="/" exact > <button  class="btn btn-light"> Go to Login </button> </router-link>
-				</div>
-			</div>
-		</div>
-	  </div>
-
 		<div class="SignUpBox">
 			<div class="SignUpInfo">
 				<h2>Member Registration</h2>
@@ -67,6 +54,19 @@
 
 			</div>
 		</div>
+
+		<div class="popup-div-wrapper" v-bind:class="{showBoxAndBoxAnimation:bool_show_registration_successful_popup}">
+			<div class="registration-successful-box" v-bind:class="RegistrationBoxAnimation">
+				<div class="w3-center">
+					<p style="font-size:30px; font-weight:600; padding:5px 0; margin:0;">Registration Successful <i style="margin-left:10px;" class="glyphicon glyphicon-thumbs-up"></i></p>
+					<div style="background-color: rgb(210, 3, 98); padding:10px; width:500px; margin: 0 auto; border-radius:10px;">
+						<p style="font-weight:600; font-size:13px; margin-bottom:8px;">But first</p>
+						<p style="font-weight:600;">Your account has to be approved by admin in order to login.</p>
+						<router-link to="/" exact > <button  class="btn btn-light"> Go to Login </button> </router-link>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 
 </template>
@@ -85,8 +85,9 @@
 				FullNameErrorMessage : '',
 				UserNameErrorMessage : '',
 				PasswordErrorMessage : '',
-				showthebox : false,
-				BoxAnimation : ''
+
+				bool_show_registration_successful_popup: false,
+				RegistrationBoxAnimation: ''
 			}
 		},
 			methods:{
@@ -169,14 +170,51 @@
 					this.hideErrors();
 				},
 				ShowRegistrationBox :function(){
-					this.showthebox = true;
-					this.BoxAnimation = 'w3-animate-zoom';
+					this.bool_show_registration_successful_popup = true;
+					this.RegistrationBoxAnimation = 'w3-animate-zoom';
 				}
 			}
 		}
 </script>
 
 <style scoped>
+	.popup-div-wrapper{
+		position: fixed;
+		z-index: 10;
+		top: 0;
+		left: 0;
+		background-color: #0000008c;
+		height: 100%;
+		width: 100%;
+		visibility: hidden;
+	}
+	.showBoxAndBoxAnimation{
+		visibility: visible;
+		animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+		transform: translate3d(0, 0, 0);
+		backface-visibility: hidden;
+		perspective: 1000px;
+	}
+	@keyframes shake {
+		0% { opacity: 0 }
+		100% {opacity : 1}
+	}
+	label{
+		font-weight: normal;
+	}
+	.delete-box{
+		z-index: 7;
+		position: absolute;
+		width: 250px;
+		height: 140px;
+		background-color: rgb(0, 0, 0, 0.9);
+		color: white;
+		border: 2px solid #e6e6e6;
+		border-radius: 10px;
+		padding: 10px;
+		top:  37%;
+		left: 41%;
+	}
 	p{
 		margin-bottom: 5px;
 	}

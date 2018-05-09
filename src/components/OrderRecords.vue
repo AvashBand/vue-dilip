@@ -23,8 +23,9 @@
 					    	<td>{{ index + 1 }}</td>
 					    	<td>{{ order.username }}</td>
 					    	<td>{{ order.food_name }}</td>
-					    	<td>{{ order.is_cancelled }}</td>
-					    	<td>{{ order.updated_at }}</td>
+					    	<td>{{ order.status }}</td>
+					    	<td>{{ order.date }}</td>
+					    	<td>{{ order.time }}</td>
 					    	<!-- <td>{{ order._id }}</td> -->
 					    </tr>
 					</table>
@@ -52,10 +53,10 @@
 				headers:{
 					'Content-Type' : 'application/json',
 					'Accept' : 'application/json',
-					// 'x-auth' : 'Bearer ' + localStorage.getItem('token'),
 					'x-auth': localStorage.getItem('token')
 				}
 			}).then((response) => { 
+				console.log(response);
 				this.Orders = response.data; 
 			});
 		},
