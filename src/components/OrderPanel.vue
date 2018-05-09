@@ -25,7 +25,7 @@
 				    <th>Price</th>
 				    <th>Order</th>
 				  </tr>
-				  <tr v-for="(food, index) in Foods">
+				  <tr v-for="(food, index) in Foods" v-bind:key="Foods._id">
 				    <td>{{ index + 1 }}</td>
 				    <td>{{ food.name }}</td>
 				    <td>{{ food.price }}</td>
@@ -78,12 +78,13 @@
 			}
 		},
 		created(){
+			this.check_for_order();	
 			this.UserName = localStorage.getItem('username');
 			this.full_name = localStorage.getItem('full_name');
 			this.populate_food_table();
 		},
 		mounted(){
-			this.check_for_order();	
+			
 			// alert(this.food_name);
 			// alert(this.ShowOrderPanel);
 
@@ -124,22 +125,21 @@
 						'x-auth': localStorage.getItem('token')
 					}
 				}).then((response) => {
-					if(response.data.order[0]){
-						console.log(response.data.order[0]);
-						this.order_id = response.data.order[0].id;
-						this.food_name = response.data.order[0].food_name;
-						this.order_time = response.data.order[0].time;
-						this.ShowOrderPanel = true;
-					} else {
-						this.ShowOrderPanel = false;
-					}	
+					// console.log(response.data);
+					this.ShowOrderPanel = false;
 				}).catch((error) => {
-					console.log(error);
+					// console.log(error.response);
+					if(error.response.data.order[0]){
+						this.order_id = error.response.data.order[0].id;
+						this.food_name = error.response.data.order[0].food_name;
+						this.order_time = error.response.data.order[0].time;
+						this.ShowOrderPanel = true;
+					}
 				});
 			},
 			create_order : function(e){
 				const data = {
-					food_id : e.target.id
+					food_id : e.target.id,
 				}
 				axios({
 					method: 'post',
@@ -151,10 +151,13 @@
 						'x-auth': localStorage.getItem('token')
 					}
 				}).then((response) => {
-					if(response.data.order[0]){
-						console.log(response.data.order[0]);
-						this.food_name = response.data.order[0].food_name;
-						this.order_time = response.data.order[0].time;
+					console.log(response.data);
+					if(response.data){
+						this.check_for_order();
+						console.log(response.data.order);
+						this.order_id = response.data.id;
+						this.food_name = response.data.food_name;
+						this.order_time = response.data.time;
 						this.ShowOrderPanel = true;
 					} else {
 						this.ShowOrderPanel = false;
@@ -172,22 +175,26 @@
 			cancel_order: function(){
 				axios({
 					method: 'patch',
-					url: 'http://localhost:3000/orders/',
+					url: 'http://localhost:3000/orders/' + this.order_id,
 					headers:{
 						'Content-Type' : 'application/json',
 						'Accept' : 'application/json',
 						'x-auth': localStorage.getItem('token')
 					}
 				}).then((response) => {
-					if(response.data.order[0].id){
-						console.log(response.data.order[0]);
-						this.food_name = response.data.order[0].food_name;
-						this.order_time = response.data.order[0].time;
-						this.ShowOrderPanel = true;
-						alert('order cancelled.');
-					} else {
-						this.ShowOrderPanel = false;
-					}	
+					console.log(response);
+					this.check_for_order();
+					// if(response.data.order[0].id){
+					// 	this.check_for_order();
+					// 	// console.log(response.data.order[0]);
+					// 	// this.food_name = response.data.order[0].food_name;
+					// 	// this.order_time = response.data.order[0].time;
+					// 	// this.ShowOrderPanel = true;
+					// 	// alert('order cancelled.');
+					// } else {
+
+					// 	this.ShowOrderPanel = false;
+					// }	
 				}).catch((error) => {
 					console.log(error);
 				});

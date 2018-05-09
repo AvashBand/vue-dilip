@@ -22,9 +22,9 @@
 				<p id="UsernameError" class="errorMsg">&nbsp{{ UserNameErrorMessage }}</p>
 
 				<p class="FormLabel">Password</p>
-				<input v-model="NewPassword" v-on:click="hideErrors" type="text" id="txtPassword" placeholder="Enter a new Password" style="margin-bottom:20px;" required/>
+				<input v-model="NewPassword" v-on:click="hideErrors" type="password" id="txtPassword" placeholder="Enter a new Password" style="margin-bottom:20px;" required/>
 
-				<input v-model="ConfirmPassword" v-on:click="hideErrors" type="text" id="txtPassword" placeholder="Confirm Password" required/>
+				<input v-model="ConfirmPassword" v-on:click="hideErrors" type="password" id="txtPassword" placeholder="Confirm Password" required/>
 				<p style="margin-bottom:0px;" id="PasswordError" class="errorMsg">&nbsp{{ PasswordErrorMessage }}</p>
 
 				<div>

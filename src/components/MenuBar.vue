@@ -104,6 +104,7 @@
 </template>
 
 <script>
+	import axios from 'axios'
 	export default {
 		mounted(){
 			this.ShowSideBar();
@@ -164,12 +165,24 @@
 	  			this.bool_show_wrapper = false;
 	  		},
 	  		Navigate : function(){
-	  			localStorage.setItem('token', '');
-	  			localStorage.setItem('username', '');
-	  			localStorage.setItem('full_name', '');
-	  			localStorage.setItem('is_active', '');
-	  			localStorage.setItem('is_admin', '');
-	  			this.$router.push('/');
+	  			axios({
+	  				method: 'patch',
+	  				url: 'http://localhost:3000/members/logout',
+	  				headers: {
+	  					'Content-Type': 'application/json',
+	  					'Accept': 'application/json',
+	  					'x-auth': localStorage.getItem('token')
+	  				}
+	  			}).then((response) => {	
+	  				localStorage.setItem('token', '');
+	  				localStorage.setItem('username', '');
+	  				localStorage.setItem('full_name', '');
+	  				localStorage.setItem('is_active', '');
+	  				localStorage.setItem('is_admin', '');
+	  				this.$router.push('/');
+	  			}).catch((e) => {
+	  				alert('Logout error');
+	  			});
 	  			// logout_route = '/'
 	  		},
 	  		ShowSideBar : function(){

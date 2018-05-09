@@ -40,10 +40,10 @@
 							        <td>{{ food.name }}</td>
 							        <td>{{ food.price }} </td>
 							        <td>
-							        	<i v-on:click="show_update_food_popup" class="button-glyphicons glyphicon glyphicon-edit"></i>
+							        	<i v-on:click="show_update_food_popup" class="button-glyphicons glyphicon glyphicon-edit" v-bind:id="food._id"></i>
 							        </td>
 							        <td>
-							        	<i v-on:click="show_delete_food_popup" class="button-glyphicons glyphicon glyphicon-trash"></i>
+							        	<i v-on:click="show_delete_food_popup" class="button-glyphicons glyphicon glyphicon-trash"  v-bind:id="food._id"></i>
 							        </td>
 							    </tr>
 							</table>
@@ -66,12 +66,12 @@
 						<form>
 							<div class="form-controls-div">
 								<label>Food Name</label>
-								<input type="text" v-model="food_name" v-on:click="hide_errors" class="form-control">
+								<input type="text" v-model="food_name" v-on:click="hide_errors" class="form-control" placeholder="Enter food name">
 								<p class="error-msg">{{name_error}}&nbsp</p>
 							</div>
 							<div class="form-controls-div">
 								<label>Price</label>
-								<input type="number" v-model="food_price" v-on:click="hide_errors" class="form-control">
+								<input type="number" v-model="food_price" v-on:click="hide_errors" class="form-control" placeholder="Enter price">
 								<p class="error-msg">{{price_error}}&nbsp</p>
 							</div>
 							<button type="button" class="btnRefresh " v-on:click="clear_text_box">
@@ -99,12 +99,12 @@
 						<form>
 							<div class="form-controls-div">
 								<label>Food Name</label>
-								<input type="text" v-model="food_name" v-on:click="hide_errors" class="form-control">
+								<input type="text" v-model="food_name" v-on:click="hide_errors" class="form-control" placeholder="Enter food name">
 								<p class="error-msg">{{name_error}}&nbsp</p>
 							</div>
 							<div class="form-controls-div">
 								<label>Price</label>
-								<input type="number" v-model="food_price" v-on:click="hide_errors" class="form-control">
+								<input type="number" v-model="food_price" v-on:click="hide_errors" class="form-control" placeholder="Enter price">
 								<p class="error-msg">{{price_error}}&nbsp</p>
 							</div>
 							<button type="button" class="btnRefresh " v-on:click="clear_text_box">
@@ -146,14 +146,15 @@
 				food_price: '',
 				name_error: '',
 				price_error: '',
-				Foods : []
+				Foods : [],
+				food_id: ''
 			}
 		},
 		created(){
 			this.populate_food_table();
 		},
 		methods: {
-			populate_food_table(){
+			populate_food_table: function(){
 				this.Foods = [];
 				axios( {
 					method: 'get',
@@ -204,22 +205,39 @@
 						'Content-Type': 'application/json',
 						'Accept': 'application/json',
 						'x-auth': localStorage.getItem('token')
-					},
+					}
 				}).then(
 					respose => {
 						this.populate_food_table();
+						this.bool_show_add_popup = false;
+					}
+				).catch((error) => { console.log(error) });
+			},
+
+			//Update
+			show_update_food_popup: function(e){
+				this.food_id = e.target.id;
+				this.bool_show_update_popup = true;
+				this.clear_text_box();
+				//Feeding data into the update box
+				axios({
+					method: 'get',
+					url: 'http://localhost:3000/foods/' + this.food_id,
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept': 'application/json',
+						'x-auth': localStorage.getItem('token')
+					}
+				}).then((response) => {
+						this.food_name = response.data.name;
+						this.food_price = response.data.price;
 					}
 				).catch((error) => { alert(error) });
 				this.bool_show_add_popup = false;
 			},
-
-			//Update
-			show_update_food_popup: function(){
-				this.clear_text_box();
-				this.bool_show_update_popup = true;
-			},
 			hide_update_food_popup: function(){
 				this.bool_show_update_popup = false;
+				this.food_id = '';
 			},
 			validate_and_update_food: function(){
 				if(this.food_name == '' || this.food_price == ''){
@@ -232,19 +250,56 @@
 					return this.name_error= 'Food already exists.';
 				}
 				else {
-					this.store_food_data();
+					const data = {
+						'name' : this.food_name,
+						'price' : this.food_price
+					};
+					console.log(data);
+					axios({
+						method: 'patch',
+						url: 'http://localhost:3000/foods/' + this.food_id,
+						data : data,
+						headers: {
+							'Content-Type': 'application/json',
+							'Accept': 'application/json',
+							'x-auth': localStorage.getItem('token')
+						}
+					}).then(
+						respose => {
+							this.populate_food_table();
+							this.hide_update_food_popup();
+							this.food_id = '';
+						}
+					).catch((error) => { alert(error) });
+					this.bool_show_add_popup = false;
 				}
 			},
 
 			//Delete
-			show_delete_food_popup: function(){
+			show_delete_food_popup: function(e){
+				this.food_id = e.target.id;
 				this.bool_show_delete_popup = true;
 			},
 			hide_delete_food_popup: function(){
 				this.bool_show_delete_popup = false;
+				this.food_id = '';
 			},
 			delete_food: function(){
-				//Delete Query goes here
+				axios({
+					method: 'delete',
+					url: 'http://localhost:3000/foods/' + this.food_id,
+					headers:{
+						'Content-Type' : 'application/json',
+						'Accept' : 'application/json',
+						'x-auth': localStorage.getItem('token')
+					}
+				}).then((response) => {
+					this.populate_food_table();
+					this.hide_delete_food_popup();
+					this.food_id = '';
+				}).catch((error) => {
+					alert('Server error');
+				});
 			},
 
 			hide_errors: function(){

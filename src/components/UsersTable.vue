@@ -16,27 +16,21 @@
 					  	<th>Username</th>
 					  	<th>Full Name</th>
 					  	<th>Status</th>
+					  	<th>Activate/Deactivate</th>
 					  	<th>Delete</th>
 					  </tr>
 
 					  <tr v-for="(user, index) in Members">
+					  	  <!-- <td>{{ user._id }}</td> -->
 					      <td> {{ index + 1 }} </td>
 					      <td>{{ user.username }}</td>
 					      <td>{{ user.name }} </td>
+					      <td v-bind:id="user.is_active">{{ user.is_active ? 'Active' : 'Inactive'}}</td>
 					      <td>
-			  		      	<label class="switch">
-			  			      	<div v-if="user.is_active">
-			  			      	  <input type="checkbox" checked/>
-			  			      	  <span class="slider round" v-on:click="toggle_user_is_active" v-bind:id="user._id"></span>
-			  			      	</div>
-			  			      	<div v-else>
-			  			      		<input type="checkbox" unchecked />
-			  			      		<span class="slider round" v-on:click="toggle_user_is_active" v-bind:id="user._id"></span>
-			  			      	</div>
-			  		      	</label>
-					  	</td>
+					      	<button type="button" v-bind:id="user.username" v-on:click="show_update_popup" class="btn  btn-warning" style="width : 100px;">{{ user.is_active ? 'Deactivate' : 'Activate'}}</button>	
+					      </td>
 					  	<td>
-					  		<i v-on:click="show_delete_food_popup"  v-bind:id="user._id" class="button-glyphicons glyphicon glyphicon-trash"></i>
+					  		<i v-on:click="show_delete_popup"  v-bind:id="user.username" class="button-glyphicons glyphicon glyphicon-trash"></i>
 					  	</td>
 					  </tr>
 					</table>
@@ -49,8 +43,20 @@
 					<p style="text-align: center; margin-bottom: 20px; font-size: 18px; font-weight: 600;">Are you sure you want to delete user?</p>
 				</div>
 				<div style="display: flex; align-items: center; justify-content: center;">
-					<button v-on:click="delete_food" class="btn btn-primary btn-lg" style="margin-right: 10px; width: 100px;">Confirm</button>
-					<button v-on:click="hide_delete_food_popup" class="btn btn-danger btn-lg" style="width: 100px;">Cancel</button>
+					<button v-on:click="delete_user" class="btn btn-primary" style=" margin-right: 10px; width: 100px;">Confirm</button>
+					<button v-on:click="hide_delete_popup" class="btn btn-danger" style="width: 100px;">Cancel</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="popup-div-wrapper"  v-bind:class="{showBoxAndBoxAnimation:bool_show_update_popup}">
+			<div class="delete-box">
+				<div class="delete-message">
+					<p style="text-align: center; margin-bottom: 20px; font-size: 18px; font-weight: 600;">Are you sure you want to activate this user?</p>
+				</div>
+				<div style="display: flex; align-items: center; justify-content: center;">
+					<button v-on:click="update_user" class="btn btn-primary" style=" margin-right: 10px; width: 100px;">Confirm</button>
+					<button v-on:click="hide_update_popup" class="btn btn-danger" style="width: 100px;">Cancel</button>
 				</div>
 			</div>
 		</div>
@@ -66,53 +72,29 @@
 			return{
 				SideBarOpened : false,
 				bool_show_delete_popup: false,
+				bool_show_update_popup: false,
 				Members: [],
-				member_id : ''
+				target_member_username : '',
+				is_active : ''
 			}
 		},
 		created(){
-			axios( {
-				method: 'get',
-				url: 'http://localhost:3000/members/',
-				headers:{
-					'Content-Type' : 'application/json',
-					'Accept' : 'application/json',
-					// 'x-auth' : 'Bearer ' + localStorage.getItem('token'),
-					'x-auth': localStorage.getItem('token')
-				}
-			}).then((response) => { 
-				this.Members = response.data; 
-			});
+			this.populate_user_table();
 		},
 		methods:{
-			toggle_user_is_active: function(e){
-				this.member_id = e.target.id;
-				axios({
-					method: 'patch',
-					url: 'localhost:3000/members/5af0726447ab54214873ee48',
+			populate_user_table: function(){
+				this.Members = [];
+				axios( {
+					method: 'get',
+					url: 'http://localhost:3000/members/',
 					headers:{
 						'Content-Type' : 'application/json',
 						'Accept' : 'application/json',
-						'x-auth': localStorage.getItem('token')
-					},
-					body: {
-						is_active: true
-					}
-				}).then((response) => {
-					alert('ID deactivated');
-				});
-			},
-			delete_food: function() {
-				axios({
-					method: 'delete',
-					url: 'localhost:3000/members/' + this.member_id,
-					headers:{
-						'Content-Type' : 'application/json',
-						'Accept' : 'application/json',
+						// 'x-auth' : 'Bearer ' + localStorage.getItem('token'),
 						'x-auth': localStorage.getItem('token')
 					}
-				}).then((response) => {
-					console.log(response);
+				}).then((response) => { 
+					this.Members = response.data; 
 				});
 			},
 			ToggleSideBar : function(){
@@ -125,15 +107,57 @@
 					console.log(this.SideBarOpened);
 				}
 			},
-
 			//Delete
-			show_delete_food_popup: function(e){
-				this.member_id = e.target.id;
+			show_delete_popup: function(e){
+				this.target_member_username = e.target.id;
 				this.bool_show_delete_popup = true;			
 			},
-			hide_delete_food_popup: function(){
+			hide_delete_popup: function(){
 				this.bool_show_delete_popup = false;
-				this.member_id = '';
+				this.target_member_username = '';
+			},
+			delete_user: function() {
+				axios({
+					method: 'delete',
+					url: 'http://localhost:3000/members/' + this.target_member_username,
+					headers:{
+						'Content-Type' : 'application/json',
+						'Accept' : 'application/json',
+						'x-auth': localStorage.getItem('token')
+					}
+				}).then((response) => {
+					this.populate_user_table();
+					this.hide_delete_popup();
+					this.target_member_username = '';
+				}).catch((error) => {
+					alert('Server error');
+				});
+			},
+			//Update
+			show_update_popup: function(e){
+				this.target_member_username = e.target.id;
+				this.bool_show_update_popup = true;			
+			},
+			hide_update_popup: function(){
+				this.bool_show_update_popup = false;
+				this.target_member_username = '';
+			},
+			update_user: function(){
+				axios({
+					method: 'patch',
+					url: 'http://localhost:3000/members/' + this.target_member_username,
+					headers:{
+						'Content-Type' : 'application/json',
+						'Accept' : 'application/json',
+						'x-auth': localStorage.getItem('token')
+					}
+				}).then((response) => {
+					this.populate_user_table();
+					this.hide_update_popup();
+					this.target_member_username = '';
+				}).catch((error) => {
+					alert('Server error');
+				});
 			}
 		},
 		mounted(){

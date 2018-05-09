@@ -102,7 +102,7 @@ import qs from 'qs'
 					}).then((response) => {
 						console.log(response.data);
 						if(!response.data){
-							this.show_login_error_popup("Username or password error");
+							this.show_login_error_popup("Username or password didnot match.");
 							return;
 						} 
 						//Normal User access
@@ -123,7 +123,7 @@ import qs from 'qs'
 						}
 
 					}).catch((e) => {
-						this.show_login_error_popup("Server error. Please try again later.");
+						this.show_login_error_popup(e.response.data.msg);
 					});
 				}
 			},	
